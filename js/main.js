@@ -1,6 +1,27 @@
-const { connect } = ReactRedux;
-const { combineReducers } = Redux;
+const { Provider, connect } = ReactRedux;
+const { combineReducers, createStore } = Redux;
 const { Component } = React;
+
+let nextTodoId = 0;
+const addTodo = (text) => {
+  return {
+    type: 'ADD_TODO',
+    id: nextTodoId += 1,
+    text
+  };
+};
+const toggleTodo = (id) => {
+  return {
+    type: 'TOGGLE_TODO',
+    id
+  };
+};
+const setVisibilityFilter = (filter) => {
+  return {
+    type: 'SET_VISIBILITY_FILTER',
+    filter
+  };
+};
 
 const todo = (state, action) => {
   switch (action.type) {
@@ -38,8 +59,10 @@ const todos = (state = [], action) => {
   }
 };
 
-const visibilityFilter = (state = 'SHOW_ALL',
-                          action) => {
+const visibilityFilter = (
+  state = 'SHOW_ALL',
+  action
+) => {
   switch (action.type) {
     case 'SET_VISIBILITY_FILTER':
       return action.filter;
@@ -87,10 +110,7 @@ const mapDispatchToLinkProps = (
   ownProps
 ) => {
   return {
-    onClick: () => dispatch({
-      type: 'SET_VISIBILITY_FILTER',
-      filter: ownProps.filter
-    })
+    onClick: () => dispatch(setVisibilityFilter(ownProps.filter))
   };
 };
 const FilterLink = connect(
@@ -142,7 +162,6 @@ const TodoList = ({
   </ul>
 );
 
-let nextTodoId = 0;
 let AddTodo = ({ dispatch }) => {
   let input;
 
@@ -152,11 +171,7 @@ let AddTodo = ({ dispatch }) => {
         input = node;
       }}/>
       <button onClick={() => {
-        dispatch({
-          type: 'ADD_TODO',
-          id: nextTodoId += 1,
-          text: input.value
-        });
+        dispatch(addTodo(input.value));
         input.value = '';
       }}>
         Add Todo
@@ -191,10 +206,7 @@ const mapDispatchToTodoListProps = (
   dispatch
 ) => {
   return {
-    onTodoClick: (id) => dispatch({
-      type: 'TOGGLE_TODO',
-      id
-    })
+    onTodoClick: (id) => dispatch(toggleTodo(id))
   };
 };
 const VisibleTodoList = connect(mapStateToTodoListProps, mapDispatchToTodoListProps)(TodoList);
@@ -207,8 +219,7 @@ const TodoApp = () => (
   </div>
 );
 
-const { Provider } = ReactRedux;
-const { createStore } = Redux;
+
 
 ReactDOM.render(
   <Provider store={ createStore(todoApp) }>
